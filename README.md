@@ -12,9 +12,11 @@ Link a [KnotDo](https://knotdo.app) list to a workspace and work its tasks witho
 ## Install
 
 1. Download `knotdo-*.vsix` from [Releases](https://github.com/VAROIndustries/VSCodeKnotDoPlugin/releases).
-2. `code --install-extension knotdo-0.1.0.vsix` (or Extensions view → `...` → *Install from VSIX...*).
+2. `code --install-extension knotdo-0.1.1.vsix` (or Extensions view → `...` → *Install from VSIX...*).
 3. Open the KnotDo view, click **Set API Key**, and paste a key from KnotDo → Workspace Settings → API Keys.
 4. Click **Link a List**, pick a list (or create one), and optionally set a title prefix.
+
+**Missing lists?** If your KnotDo workspace limits *API-accessible lists* (Workspace Settings → API Keys), only the ticked lists show up here, and a list created from VS Code stays hidden until you tick it. Untick every list to expose them all.
 
 ## Settings
 

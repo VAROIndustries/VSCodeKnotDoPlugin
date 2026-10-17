@@ -25,13 +25,24 @@ async function api(method, route, body) {
 const setCtx = (k, v) => vscode.commands.executeCommand('setContext', `knotdo.${k}`, v);
 const fail = (e) => vscode.window.showErrorMessage(`KnotDo: ${e.message}`);
 
+// KnotDo's "API-accessible lists" setting hides unticked lists from GET /lists. Explain it once per list.
+let warned;
+function notVisible(what) {
+  if (warned === what) return;
+  warned = what;
+  vscode.window.showWarningMessage(
+    `KnotDo: ${what} isn't visible to your API key. In KnotDo → Workspace Settings → API Keys → "API-accessible lists", tick it (or untick every list to expose them all), then Refresh.`,
+    'Open KnotDo Settings', 'Link a Different List',
+  ).then((p) => (p === 'Open KnotDo Settings' ? vscode.env.openExternal(vscode.Uri.parse(`${base()}/settings`)) : p && linkList()));
+}
+
 async function refresh() {
   try {
     const hasKey = !!(await ctx.secrets.get('knotdo.apiKey'));
     await setCtx('hasKey', hasKey);
     const ref = cfg().get('list');
     list = hasKey && ref ? T.findList((await api('GET', '/lists')).lists, ref) : undefined;
-    if (hasKey && ref && !list) vscode.window.showWarningMessage(`KnotDo: linked list "${ref}" not found.`, 'Link a List').then((p) => p && linkList());
+    if (hasKey && ref && !list) notVisible(`the list "${cfg().get('listName') || ref}"`);
     await setCtx('linked', !!list);
     // Fetch per status: done tasks pile up and would crowd open ones out of the 500-row cap.
     // ponytail: done view shows an arbitrary 500 when a list has more; the API has no paging or sort.
@@ -90,14 +101,16 @@ async function linkList() {
   try {
     const { lists } = await api('GET', '/lists');
     const NEW = '$(add) Create new list…';
-    const pick = await vscode.window.showQuickPick([...lists.map((l) => ({ label: l.name, list: l })), { label: NEW }], { placeHolder: 'KnotDo list to link to this workspace' });
+    const pick = await vscode.window.showQuickPick([...lists.map((l) => ({ label: l.name, list: l })), { label: NEW }], { placeHolder: 'KnotDo list to link to this workspace (missing one? check API-accessible lists in KnotDo Workspace Settings)' });
     if (!pick) return;
     let chosen = pick.list;
     if (!chosen) {
       const name = await vscode.window.showInputBox({ prompt: 'New list name', value: vscode.workspace.name });
       if (!name) return;
       chosen = (await api('POST', '/lists', { name })).list;
+      if (!(await api('GET', '/lists')).lists.some((l) => l.id === chosen.id)) notVisible(`the list "${chosen.name}"`);
     }
+    await cfg().update('listName', chosen.name, vscode.ConfigurationTarget.Workspace);
     await cfg().update('list', chosen.id, vscode.ConfigurationTarget.Workspace);
     const pre = await vscode.window.showInputBox({ prompt: 'Optional: only show tasks whose title starts with… (for lists shared by several projects). Esc or empty = whole list.', value: cfg().get('titlePrefix') || `${vscode.workspace.name} — ` });
     if (pre !== undefined) await cfg().update('titlePrefix', pre, vscode.ConfigurationTarget.Workspace);
