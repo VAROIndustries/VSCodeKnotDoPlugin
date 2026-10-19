@@ -2,7 +2,7 @@
   "name": "knotdo",
   "displayName": "KnotDo",
   "description": "Link a KnotDo list to a workspace and work its tasks from VS Code: tick off, add, edit, and capture tasks from code.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "varoindustries",
   "repository": {
     "type": "git",

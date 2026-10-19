@@ -110,8 +110,9 @@ async function linkList() {
       chosen = (await api('POST', '/lists', { name })).list;
       if (!(await api('GET', '/lists')).lists.some((l) => l.id === chosen.id)) notVisible(`the list "${chosen.name}"`);
     }
-    await cfg().update('listName', chosen.name, vscode.ConfigurationTarget.Workspace);
     await cfg().update('list', chosen.id, vscode.ConfigurationTarget.Workspace);
+    // Informational only; throws when a hot-swapped update hasn't registered the setting yet.
+    await cfg().update('listName', chosen.name, vscode.ConfigurationTarget.Workspace).then(undefined, () => {});
     const pre = await vscode.window.showInputBox({ prompt: 'Optional: only show tasks whose title starts with… (for lists shared by several projects). Esc or empty = whole list.', value: cfg().get('titlePrefix') || `${vscode.workspace.name} — ` });
     if (pre !== undefined) await cfg().update('titlePrefix', pre, vscode.ConfigurationTarget.Workspace);
     vscode.window.showInformationMessage(`KnotDo: linked "${chosen.name}" to this workspace.`);
