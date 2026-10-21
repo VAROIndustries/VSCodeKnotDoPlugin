@@ -47,7 +47,7 @@ assert.deepStrictEqual(t.map((n) => n.id), ['3', '2', '1', '4']);
 assert.deepStrictEqual(t[3].children.map((n) => n.id), ['7']);
 assert.strictEqual(T.openCount(rows), 5);
 
-assert.strictEqual(T.describe({ priority: 'urgent', status: 'in_progress', dueDate: '2026-10-17T12:00:00.000Z' }, now), '$(flame) in progress today');
+assert.strictEqual(T.describe({ priority: 'urgent', status: 'in_progress', dueDate: '2026-10-17T12:00:00.000Z' }, now), 'urgent in progress today');
 assert.strictEqual(T.describe({ priority: 'none', status: 'todo' }, now), '');
 
 // selection -> task

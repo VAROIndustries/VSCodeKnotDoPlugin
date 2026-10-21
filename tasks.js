@@ -1,6 +1,7 @@
 // Pure helpers (no vscode import) so test.js can run them under plain node.
 const PRIORITIES = ['none', 'low', 'medium', 'high', 'urgent'];
-const PRIORITY_ICON = { urgent: '$(flame)', high: '$(arrow-up)', medium: '', low: '$(arrow-down)', none: '' };
+// Tree descriptions render text literally (no $(codicon) support), so priority is a plain word; low/medium stay silent.
+const PRIORITY_TAG = { urgent: 'urgent', high: 'high' };
 const DAY = 864e5;
 
 // A linked list is stored as a name or an id; id wins so renames in KnotDo don't break the link.
@@ -53,7 +54,7 @@ function tree(rows, showCompleted) {
 }
 
 function describe(t, now = Date.now()) {
-  return [PRIORITY_ICON[t.priority] || '', t.status === 'in_progress' ? 'in progress' : '', dueLabel(t.dueDate, now)].filter(Boolean).join(' ');
+  return [PRIORITY_TAG[t.priority] || '', t.status === 'in_progress' ? 'in progress' : '', dueLabel(t.dueDate, now)].filter(Boolean).join(' ');
 }
 
 // Optional per-workspace title prefix ("MyProject — ") narrows a shared list to this project.
